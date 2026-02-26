@@ -1,0 +1,68 @@
+DROP TABLE IF EXISTS Handles CASCADE;
+DROP TABLE IF EXISTS Needs CASCADE;
+DROP TABLE IF EXISTS Works_On CASCADE;
+DROP TABLE IF EXISTS Owns CASCADE;
+
+DROP TABLE IF EXISTS Service CASCADE;
+DROP TABLE IF EXISTS Car CASCADE;
+DROP TABLE IF EXISTS Mechanic CASCADE;
+DROP TABLE IF EXISTS Customer CASCADE;
+
+CREATE TABLE Customer (
+  Phone_Num   TEXT PRIMARY KEY,
+  First_Name  TEXT NOT NULL,
+  Last_Name   TEXT NOT NULL,
+  Address     TEXT
+);
+
+CREATE TABLE Car (
+  VIN     TEXT PRIMARY KEY,
+  Year    INTEGER NOT NULL,
+  Make    TEXT NOT NULL,
+  Model   TEXT NOT NULL
+);
+
+CREATE TABLE Mechanic (
+  ID          INT PRIMARY KEY,
+  First_Name  TEXT NOT NULL,
+  Last_Name   TEXT NOT NULL,
+  Experience  INTEGER NOT NULL
+);
+
+CREATE TABLE Service (
+  ID          INT PRIMARY KEY,
+  Open_Date   DATE NOT NULL,
+  Status      TEXT NOT NULL,
+  Odometer    INTEGER,
+  Description TEXT
+);
+
+CREATE TABLE Owns (
+  Phone_Num  TEXT NOT NULL UNIQUE REFERENCES Customer(Phone_Num),
+  VIN        TEXT NOT NULL UNIQUE REFERENCES Car(VIN),
+  PRIMARY KEY (Phone_Num, VIN)
+);
+
+CREATE TABLE Works_On (
+  Mechanic_ID INT NOT NULL UNIQUE REFERENCES Mechanic(ID),
+  VIN         TEXT NOT NULL UNIQUE REFERENCES Car(VIN),
+  PRIMARY KEY (Mechanic_ID, VIN)
+);
+
+CREATE TABLE Needs (
+  VIN         TEXT NOT NULL REFERENCES Car(VIN),
+  Service_ID  INT NOT NULL UNIQUE REFERENCES Service(ID),
+  PRIMARY KEY (VIN, Service_ID)
+);
+
+CREATE TABLE Handles (
+  Mechanic_ID INT NOT NULL REFERENCES Mechanic(ID),
+  Service_ID  INT NOT NULL UNIQUE REFERENCES Service(ID),
+  Bill        NUMERIC(10,2),
+  Closed_Date DATE,
+  Comments    TEXT,
+  PRIMARY KEY (Mechanic_ID, Service_ID)
+);
+
+
+
