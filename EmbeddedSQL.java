@@ -6,6 +6,7 @@
  * Department of Computer Science &amp; Engineering
  * University of California - Riverside
  *
+ * Swing java for gui extra credit!!!!!
  * Target DBMS: 'Postgres'
  *
  */
@@ -21,6 +22,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -165,29 +169,52 @@ public class EmbeddedSQL {
          String user = args[2];
          esql = new EmbeddedSQL (dbname, dbport, user, "");
 
-         boolean keepon = true;
-         while(keepon) {
+
+         boolean quit = false;
+
+         //welcome page
+         System.out.println("Welcome to **** mechanics:");
+         System.out.println("---------");
+         System.out.println("Do you need to be added to dataset: Type Yes/No");
+         String answer = readStringChoice();
+         int employeeID;
+         if(answer.tolowercase() == "yes") {
+            System.out.println("Enter your work ID: ");
+            employeeID = readIntChoice();
+            System.out.println("Enter your first name: ");
+            String firstName = readStringChoice();
+            System.out.println("Enter your last name: ");
+            String lastName = readStringChoice();
+            System.out.println("Enter how many years of experience you have: ");
+            int experience = readIntChoice();
+            AddMechanic(esql, ID, firstName, lastName, experience);
+         }
+
+         System.out.println("Enter your work ID to log in: ");
+         employeeID = readIntChoice();
+            
+      
+         while(!quit) {
             // These are sample SQL statements
-            System.out.println("MAIN MENU: What would you like for us to do");
-            System.out.println("---------");
-            System.out.println("0. Are you a customer? Type 0 if you wish to be added to our program");
-            System.out.println("1. Are you looking for a job? Type 1 if you want to be hired as a mechanic");
-            System.out.println("2. Type 2 if you want to add a car to our system");
-            System.out.println("3. Type 3 if you want to request service");
-            System.out.println("4. For every supplier that supplies green part and red part, print the name and the price of the most expensive part that he supplies"); 
-            System.out.println("5. Find the name of parts with cost lower than $_____");
-            System.out.println("6. Find the address of the suppliers who supply _____________ (pname)");
+            System.out.println("Are you here for ");
+            System.out.println("0. Type 0 if you wish to open a service request");
+            System.out.println("1. Type 1 if you wish to close a service request");
+            System.out.println("2. Type 2 if you wish to list customers that paid less than 100 dollars");
+            System.out.println("3. Type 3 if you wish to list customers with more than 20 cars");
+            System.out.println("4. Type 4 if you wish to list cars built before 1995 that has less than 50000 miles"); 
+            System.out.println("5. Type 5 if you wish to list the first k cars with the highest number of service requests");
+            System.out.println("6. Type 6 if you wish to list all the customers and total bill in descending order");
             System.out.println("9. < EXIT");
 
-            switch (readChoice()){
-               case 0: QueryExample(esql); break;
-               case 1: Query1(esql); break;
+            switch (readIntChoice()){
+               case 0: ServiceRequest(esql, employeeID); break;
+               case 1: CloseRequest(esql); break;
                case 2: Query2(esql); break;
                case 3: Query3(esql); break;
                case 4: Query4(esql); break;
                case 5: Query5(esql); break;
                case 6: Query6(esql); break;
-               case 9: keepon = false; break;
+               case 9: quit = true; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
          }//end while
@@ -206,7 +233,73 @@ public class EmbeddedSQL {
          }//end try
       }//end try
    }//end main
-   
+
+   public static void ServiceRequest(EmbeddedSQL esql, int employeeID) {
+      System.out.println("Enter your customer's last name: ");
+      String phoneNum;
+      String lastName = readStringChoice();
+      int rowCount = CustomerExists(esql, lastName);
+      if(rowCount <= 0) {
+         System.out.println("Customer does not exist, please add to database");
+         System.out.printIn("Enter customer's first name: ");
+         String firstName = readStringChoice();
+         System.out.println("Enter customer's phone number: ");
+         phoneNum = readStringChoice();
+         System.out.println("Enter customer's address: ");
+         String address = readStringChoice();
+         AddCustomer(esql, firstName, lastName, phoneNum, address);
+      }
+      else{
+         DisplayCustomers(esql, lastName);
+         System.out.Println("Please type in phone number to select customer: ");
+         phoneNum = readStringChoice();
+      }
+
+      rowCount = VehicleExists(esql, phoneNum);
+      String vin;
+      if(rowCount <= 0) {
+         System.out.println("It seems you have no cars added, please add car to database");
+         System.out.println("Please type in vehicle's VIN: ");
+         vin = readStringChoice();
+         System.out.println("Please type in vehicle's year: ");
+         int year = readIntChoice();
+         System.out.println("Please type in vehicle's make: ");
+         String make = readStringChoice();
+         System.out.println("Please type in vehicle's model: ");
+         String model = readStringChoice();
+         AddVehicle(esql, vin, year, make, model);
+         CustomerOwns(esql, phoneNum, vin);
+      }
+      else {
+         DisplayVehicles(esql, phoneNum);
+         System.out.Println("Please type in VIN to select vehicle: ");
+         vin = readStringChoice();
+      }
+
+      rowCount = NumRequests(esql);
+
+      System.out.Println("Create service request.");
+      LocalDate today = LocalDate.now()
+      System.out.Println("Please enter the type of service needed: ");
+      String service = readStringChoice();
+      System.out.Println("Please enter odometer reading: ");
+      int odometer = readIntChoice();
+      System.outPrintln("Please type a short description of the service needed: ");
+      String description = readStringChoice();
+
+      AddService(esql, rowCount + 1, today, status, odometer, description);
+      CarsNeedsService(esql, vin, rowCount + 1);
+      rowCount = IsAlreadyWorking(esql, employeeID, vin);
+
+      if(rowCount >= 1) {
+         System.out.Println("It seems you are already working on another car. Please let another employee handle this car.");
+      }
+      else {
+         WorksOn(esql, employeeID, vin);
+      }
+   }
+
+
    public static void Greeting(){
       System.out.println(
          "\n\n*******************************************************\n" +
@@ -218,7 +311,23 @@ public class EmbeddedSQL {
     * Reads the users choice given from the keyboard
     * @int
     **/
-   public static int readChoice() {
+   public static String readStringChoice() {
+      String input;
+      // returns only if a correct value is given.
+      do {
+         System.out.print("Please make your choice: ");
+         try { // read the integer, parse it and break.
+            input = reader.readLine();
+            break;
+         }catch (Exception e) {
+            System.out.println("Your input is invalid!");
+            continue;
+         }//end try
+      }while (true);
+      return input;
+   }//end readChoice
+
+   public static int readIntChoice() {
       int input;
       // returns only if a correct value is given.
       do {
@@ -232,27 +341,60 @@ public class EmbeddedSQL {
          }//end try
       }while (true);
       return input;
-   }//end readChoice
+   }
 
-   public static void QueryExample(EmbeddedSQL esql){
-      try{
-         String query = "SELECT * FROM Catalog WHERE cost < ";
-         System.out.print("\tEnter cost: $");
-         String input = in.readLine();
-         query += input;
+   public static void DisplayCustomers(EmbeddedSQL esql, string lastName) {
+      //Display ALL customers' info given customer's last name
+   }
 
-         int rowCount = esql.executeQuery(query);
-         System.out.println ("total row(s): " + rowCount);
-      }catch(Exception e){
-         System.err.println (e.getMessage());
-      }
-   }//end QueryExample
+   public static void DisplayVehicles(EmbeddedSQL esql, String phoneNum) {
+      //Display ALL vehicles' info given a customer's phone number
+   }
+
+   public static int NumRequests(EmbeddedSQL esql) {
+      //select * from service table and return row number
+   }
+
+   public static int CustomerExists(EmbeddedSQL esql, String lastName){
+    //simply return row number from customer last name  
+
+   }
+
+   public static int VehicleExists(EmbeddedSQL esql, String phoneNum) {
+      //Return the row number from customer's phone number
+   }
+
+   public static int IsAlreadyWorking(EmbeddedSQL, int ID, string vin) {
+      //Return the row number from mechanics' id and car's vin number
+   }
+
+   public static void CustomerOwns(EmbeddedSQL esql, String phoneNum, String vin) {
+      //add the phone number and vin number so we can identify which customer owns which car
+   }
+
+   public static void CarsNeedsService(EmbeddedSQL esql, String vin, int ID) {
+      //add vin number and service id so we can idenitfy which car needs what service
+   }
+
+   public statis void WorksOn(EmbeddedSQL esql, int ID, string vin) {
+      //add employee id and vin number to table so we know which mechanic is in charge of which car
+   }
    
-   public static void Query1(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query1
+   public static void AddCustomer(EmbeddedSQL esql, String firstName, String lastName, String phoneNum, String address){
+      //Add customer to database
+   }
+
+   public static void AddMechanic(EmbeddedSQL esql, int ID, String firstName, string lastName, int experience){
+      //Add Mechanic to database
+   }
+
+   public static void AddVehicle(EmbeddedSQL esql, String vin, int year, String make, String model){
+      //Add vehicle to database
+   }
+
+   public static void AddService(EmbeddedSQL esql, int ID, LocalDate today, String status, int odometer, String text) {
+      //Create a new service request
+   }
 
    public static void Query2(EmbeddedSQL esql){
       // Your code goes here.
@@ -271,17 +413,5 @@ public class EmbeddedSQL {
       // ...
       // ...
    }//end Query4
-
-   public static void Query5(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query5
-
-   public static void Query6(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query6
 
 }//end EmbeddedSQL
