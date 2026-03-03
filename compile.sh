@@ -1,7 +1,7 @@
 #!/bin/sh
 export CLASSPATH=$CLASSPATH:$PWD/pg73jdbc3.jar
 javac EmbeddedSQL.java
-java EmbeddedSQL $USER"_lab6_DB" $PGPORT $USER
+java EmbeddedSQL $USER"_project_DB" $PGPORT $USER
 
 # Indicate the path of the java compiler to use
 export JAVA_HOME=/usr/csshare/pkgs/jdk1.7.0_17
@@ -15,5 +15,5 @@ javac EmbeddedSQL.java
 
 #run the java program
 #Use your database name, port number and login
-java EmbeddedSQL $USER"_DB" $PGPORT $USER
+java EmbeddedSQL $USER"_project_DB" $PGPORT $USER
 

@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -178,7 +179,7 @@ public class EmbeddedSQL {
          System.out.println("Do you need to be added to dataset: Type Yes/No");
          String answer = readStringChoice();
          int employeeID;
-         if(answer.tolowercase() == "yes") {
+         if(answer.toLowerCase() == "yes") {
             System.out.println("Enter your work ID: ");
             employeeID = readIntChoice();
             System.out.println("Enter your first name: ");
@@ -187,7 +188,7 @@ public class EmbeddedSQL {
             String lastName = readStringChoice();
             System.out.println("Enter how many years of experience you have: ");
             int experience = readIntChoice();
-            AddMechanic(esql, ID, firstName, lastName, experience);
+            AddMechanic(esql, employeeID, firstName, lastName, experience);
          }
 
          System.out.println("Enter your work ID to log in: ");
@@ -208,7 +209,7 @@ public class EmbeddedSQL {
 
             switch (readIntChoice()){
                case 0: ServiceRequest(esql, employeeID); break;
-               case 1: CloseRequest(esql); break;
+               case 1: CloseRequest(esql, employeeID); break;
                case 2: Query2(esql); break;
                case 3: Query3(esql); break;
                case 4: Query4(esql); break;
@@ -241,7 +242,7 @@ public class EmbeddedSQL {
       int rowCount = CustomerExists(esql, lastName);
       if(rowCount <= 0) {
          System.out.println("Customer does not exist, please add to database");
-         System.out.printIn("Enter customer's first name: ");
+         System.out.println("Enter customer's first name: ");
          String firstName = readStringChoice();
          System.out.println("Enter customer's phone number: ");
          phoneNum = readStringChoice();
@@ -251,7 +252,7 @@ public class EmbeddedSQL {
       }
       else{
          DisplayCustomers(esql, lastName);
-         System.out.Println("Please type in phone number to select customer: ");
+         System.out.println("Please type in phone number to select customer: ");
          phoneNum = readStringChoice();
       }
 
@@ -272,19 +273,19 @@ public class EmbeddedSQL {
       }
       else {
          DisplayVehicles(esql, phoneNum);
-         System.out.Println("Please type in VIN to select vehicle: ");
+         System.out.println("Please type in VIN to select vehicle: ");
          vin = readStringChoice();
       }
 
       rowCount = NumRequests(esql);
 
-      System.out.Println("Create service request.");
-      LocalDate today = LocalDate.now()
-      System.out.Println("Please enter the type of service needed: ");
-      String service = readStringChoice();
-      System.out.Println("Please enter odometer reading: ");
+      System.out.println("Create service request.");
+      LocalDate today = LocalDate.now();
+      System.out.println("Please enter the type of service needed: ");
+      String status = readStringChoice();
+      System.out.println("Please enter odometer reading: ");
       int odometer = readIntChoice();
-      System.outPrintln("Please type a short description of the service needed: ");
+      System.out.println("Please type a short description of the service needed: ");
       String description = readStringChoice();
 
       AddService(esql, rowCount + 1, today, status, odometer, description);
@@ -292,13 +293,16 @@ public class EmbeddedSQL {
       rowCount = IsAlreadyWorking(esql, employeeID, vin);
 
       if(rowCount >= 1) {
-         System.out.Println("It seems you are already working on another car. Please let another employee handle this car.");
+         System.out.println("It seems you are already working on another car. Please let another employee handle this car.");
       }
       else {
          WorksOn(esql, employeeID, vin);
       }
    }
 
+   public static void CloseRequest(EmbeddedSQL esql, int employeeID) {
+      //
+   }
 
    public static void Greeting(){
       System.out.println(
@@ -313,11 +317,11 @@ public class EmbeddedSQL {
     **/
    public static String readStringChoice() {
       String input;
+      Scanner scanner = new Scanner(System.in);
       // returns only if a correct value is given.
       do {
-         System.out.print("Please make your choice: ");
          try { // read the integer, parse it and break.
-            input = reader.readLine();
+            input = scanner.nextLine();
             break;
          }catch (Exception e) {
             System.out.println("Your input is invalid!");
@@ -331,7 +335,6 @@ public class EmbeddedSQL {
       int input;
       // returns only if a correct value is given.
       do {
-         System.out.print("Please make your choice: ");
          try { // read the integer, parse it and break.
             input = Integer.parseInt(in.readLine());
             break;
@@ -343,7 +346,7 @@ public class EmbeddedSQL {
       return input;
    }
 
-   public static void DisplayCustomers(EmbeddedSQL esql, string lastName) {
+   public static void DisplayCustomers(EmbeddedSQL esql, String lastName) {
       //Display ALL customers' info given customer's last name
    }
 
@@ -353,19 +356,23 @@ public class EmbeddedSQL {
 
    public static int NumRequests(EmbeddedSQL esql) {
       //select * from service table and return row number
+      return 0;
    }
 
    public static int CustomerExists(EmbeddedSQL esql, String lastName){
     //simply return row number from customer last name  
+    return 0;
 
    }
 
    public static int VehicleExists(EmbeddedSQL esql, String phoneNum) {
       //Return the row number from customer's phone number
+      return 0;
    }
 
-   public static int IsAlreadyWorking(EmbeddedSQL, int ID, string vin) {
+   public static int IsAlreadyWorking(EmbeddedSQL esql, int ID, String vin) {
       //Return the row number from mechanics' id and car's vin number
+      return 0;
    }
 
    public static void CustomerOwns(EmbeddedSQL esql, String phoneNum, String vin) {
@@ -376,7 +383,7 @@ public class EmbeddedSQL {
       //add vin number and service id so we can idenitfy which car needs what service
    }
 
-   public statis void WorksOn(EmbeddedSQL esql, int ID, string vin) {
+   public static void WorksOn(EmbeddedSQL esql, int ID, String vin) {
       //add employee id and vin number to table so we know which mechanic is in charge of which car
    }
    
@@ -384,7 +391,7 @@ public class EmbeddedSQL {
       //Add customer to database
    }
 
-   public static void AddMechanic(EmbeddedSQL esql, int ID, String firstName, string lastName, int experience){
+   public static void AddMechanic(EmbeddedSQL esql, int ID, String firstName, String lastName, int experience){
       //Add Mechanic to database
    }
 
@@ -413,5 +420,19 @@ public class EmbeddedSQL {
       // ...
       // ...
    }//end Query4
+
+   public static void Query5(EmbeddedSQL esql){
+      // Your code goes here.
+      // ...
+      // ...
+   }//end Query5
+
+   public static void Query6(EmbeddedSQL esql){
+      // Your code goes here.
+      // ...
+      // ...
+   }//end Query6
+
+
 
 }//end EmbeddedSQL
