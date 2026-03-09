@@ -64,5 +64,62 @@ CREATE TABLE Handles (
   PRIMARY KEY (Mechanic_ID, Service_ID)
 );
 
+COPY Customer (
+  Phone_Num,
+  First_Name,
+  Last_Name,
+  Address)
+FROM '/class/classes/ahern561/CS-166-project/Customer.csv'
+WITH DELIMITER ',';
 
+COPY Car (
+  VIN,
+  Year,
+  Make,
+  Model)
+FROM '/class/classes/ahern561/CS-166-project/Car.csv'
+WITH DELIMITER ',';
 
+COPY Mechanic (
+  ID,
+  First_Name,
+  Last_Name,
+  Experience)
+FROM '/class/classes/ahern561/CS-166-project/Mechanic.csv'
+WITH DELIMITER ',';
+
+COPY Service (
+  ID,
+  Open_Date,
+  Status,
+  Odometer,
+  Description)
+FROM '/class/classes/ahern561/CS-166-project/Service.csv'
+WITH DELIMITER ',';
+
+COPY Owns (
+  Phone_Num,
+  VIN)
+FROM '/class/classes/ahern561/CS-166-project/Owns.csv'
+WITH DELIMITER ',';
+
+COPY Works_On (
+  Mechanic_ID,
+  VIN)
+FROM '/class/classes/ahern561/CS-166-project/Works_On.csv'
+WITH DELIMITER ',';
+
+COPY Needs (
+  VIN,
+  Service_ID)
+FROM '/class/classes/ahern561/CS-166-project/Needs.csv'
+WITH DELIMITER ',';
+
+COPY Handles (
+  Mechanic_ID,
+  Service_ID,
+  Bill,
+  Closed_Date,
+  Comments)
+FROM '/class/classes/ahern561/CS-166-project/Handles.csv'
+WITH DELIMITER ',';
