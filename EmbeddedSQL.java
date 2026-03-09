@@ -281,7 +281,7 @@ public class EmbeddedSQL {
 
       System.out.println("Create service request.");
       LocalDate today = LocalDate.now();
-      System.out.println("Please enter the type of service needed: ");
+      System.out.println("Please enter if the service is open or closed(Type Open/Closed): ");
       String status = readStringChoice();
       System.out.println("Please enter odometer reading: ");
       int odometer = readIntChoice();
@@ -301,7 +301,51 @@ public class EmbeddedSQL {
    }
 
    public static void CloseRequest(EmbeddedSQL esql, int employeeID) {
-      //
+      
+      boolean correctCar = false;
+      String vin = "";
+      while(!correctCar) {
+         System.out.println("Please select the vin number for the car you are working on: ");
+         vin = readStringChoice();
+         int rowCount = IsAlreadyWorking(esql, employeeID, vin);
+         if(rowCount <= 0) {
+            System.out.println("The given vin number does not match the car you are working on. Please re type vin: ");
+         }
+         else {
+            correctCar = true;
+         }
+      }
+
+
+      boolean validServiceID = false;
+      int serviceID = 0;
+      while(!validServiceID) {
+         System.out.println("Please select the service number you wish to close: ");
+         DisplayServices(esql, vin);
+
+         serviceID = readIntChoice();
+         int rowCount = ServiceExists(esql, serviceID);
+         if(rowCount <= 0) {
+            System.out.println("Service ID does not exist in dataset: Please re enter ID: ");
+         }
+         else {
+            validServiceID = true;
+         }
+      }
+
+      System.out.println("Closing Service request, please add in some last comments: ");
+      String comments = readStringChoice();
+      System.out.println("Enter the final bill for service: ");
+      int bill = readIntChoice();
+      LocalDate today = LocalDate.now();
+
+      Handles(esql, employeeID, serviceID, bill, today, comments);
+      UpdateService(esql, serviceID);
+      int rowCount = AviliableServices(esql, vin);
+      if(rowCount <= 0) {
+         System.out.println("Car has completed all service requests needed");
+         DeleteCar(esql, employeeID, vin);
+      }
    }
 
    public static void Greeting(){
@@ -354,6 +398,10 @@ public class EmbeddedSQL {
       //Display ALL vehicles' info given a customer's phone number
    }
 
+   public static void DisplayServices(EmbeddedSQL esql, String vin) {
+      //Display all OPEN services requests ID and description from VIN.
+   }
+
    public static int NumRequests(EmbeddedSQL esql) {
       //select * from service table and return row number
       return 0;
@@ -370,21 +418,36 @@ public class EmbeddedSQL {
       return 0;
    }
 
+   public static int ServiceExists(EmbeddedSQL esql, int serviceID) {
+      //Return the row number from service table based on service table
+      return 0;
+   }
+
+   public static int AviliableServices(EmbeddedSQL esql, String vin) {
+      //Return the row number from all OPEN services based on vin number
+      return 0;
+   }
+
+
    public static int IsAlreadyWorking(EmbeddedSQL esql, int ID, String vin) {
       //Return the row number from mechanics' id and car's vin number
       return 0;
    }
 
    public static void CustomerOwns(EmbeddedSQL esql, String phoneNum, String vin) {
-      //add the phone number and vin number so we can identify which customer owns which car
+      //add the phone number and vin number to owns table so we can identify which customer owns which car
    }
 
    public static void CarsNeedsService(EmbeddedSQL esql, String vin, int ID) {
-      //add vin number and service id so we can idenitfy which car needs what service
+      //add vin number and service id to needs table so we can idenitfy which car needs what service
    }
 
    public static void WorksOn(EmbeddedSQL esql, int ID, String vin) {
-      //add employee id and vin number to table so we know which mechanic is in charge of which car
+      //add employee id and vin number to worksOn table so we know which mechanic is in charge of which car
+   }
+
+   public static void Handles(EmbeddedSQL esql, int employeeID, int serviceID, int bill, LocalDate today, String comments) {
+      //add the arguments to handles table so we know who closed the service request.
    }
    
    public static void AddCustomer(EmbeddedSQL esql, String firstName, String lastName, String phoneNum, String address){
@@ -401,6 +464,14 @@ public class EmbeddedSQL {
 
    public static void AddService(EmbeddedSQL esql, int ID, LocalDate today, String status, int odometer, String text) {
       //Create a new service request
+   }
+
+   public static void UpdateService(EmbeddedSQL esql, int serviceID) {
+      //Update the service col from open to closed based on the serviceID
+   }
+
+   public static void DeleteCar(EmbeddedSQL esql, int employeeID, String vin) {
+      //Delete row from WorksOn table based on the ID and vin number
    }
 
    public static void Query2(EmbeddedSQL esql){
