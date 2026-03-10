@@ -176,9 +176,9 @@ public class EmbeddedSQL {
          //welcome page
          System.out.println("Welcome to **** mechanics:");
          System.out.println("---------");
-         System.out.println("Do you need to be added to dataset: Type Yes/No");
+         System.out.println("Do you need to be added to the system: Type Yes/No");
          String answer = readStringChoice();
-         int employeeID;
+         int employeeID = 0;
          if(answer.toLowerCase() == "yes") {
             System.out.println("Enter your work ID: ");
             employeeID = readIntChoice();
@@ -191,8 +191,20 @@ public class EmbeddedSQL {
             AddMechanic(esql, employeeID, firstName, lastName, experience);
          }
 
-         System.out.println("Enter your work ID to log in: ");
-         employeeID = readIntChoice();
+         boolean isEmployee = false;
+
+         while(!isEmployee) {
+             System.out.println("Enter your work ID to log in: ");
+             employeeID = readIntChoice();
+             int rowCount = MechanicExists(esql, employeeID);
+             if(rowCount <= 0) {
+               System.out.println("Can't find ID. Please re type ID");
+             }
+             else {
+               isEmployee = true;
+             }
+         }
+
             
       
          while(!quit) {
@@ -411,6 +423,11 @@ public class EmbeddedSQL {
     //simply return row number from customer last name  
     return 0;
 
+   }
+
+   public static int MechanicExists(EmbeddedSQL esql, int employeeID) {
+      //Simply return row number from mechanic's ID
+      return 0;
    }
 
    public static int VehicleExists(EmbeddedSQL esql, String phoneNum) {
