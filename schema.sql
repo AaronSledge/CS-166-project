@@ -38,7 +38,7 @@ CREATE TABLE Service (
 );
 
 CREATE TABLE Owns (
-  Phone_Num  TEXT NOT NULL UNIQUE REFERENCES Customer(Phone_Num),
+  Phone_Num  TEXT NOT NULL REFERENCES Customer(Phone_Num),
   VIN        TEXT NOT NULL UNIQUE REFERENCES Car(VIN),
   PRIMARY KEY (Phone_Num, VIN)
 );
