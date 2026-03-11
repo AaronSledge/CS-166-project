@@ -503,8 +503,13 @@ public class EmbeddedSQL {
 
    public static int IsAlreadyWorking(EmbeddedSQL esql, int ID, String vin) {
       try {
-         String sql = "SELECT * FROM Works_On " +
-                      "WHERE Mechanic_ID = " + ID + " AND VIN = '" + vin + "';";
+         String sql;
+         if (vin == null || vin.equals("")) {
+            sql = "SELECT * FROM Works_On WHERE Mechanic_ID = " + ID + ";";
+         } else {
+            sql = "SELECT * FROM Works_On WHERE Mechanic_ID = " + ID +
+                  " AND VIN = '" + vin + "';";
+         }
          return esql.executeQuery(sql);
       } catch (Exception e) {
          System.err.println(e.getMessage());
