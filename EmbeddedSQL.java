@@ -403,124 +403,302 @@ public class EmbeddedSQL {
    }
 
    public static void DisplayCustomers(EmbeddedSQL esql, String lastName) {
-      //Display ALL customers' info given customer's last name
+      try {
+         String sql = "SELECT Phone_Num, First_Name, Last_Name, Address " +
+                   "FROM Customer " +
+                   "WHERE Last_Name = '" + lastName + "';";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void DisplayVehicles(EmbeddedSQL esql, String phoneNum) {
-      //Display ALL vehicles' info given a customer's phone number
+      try {
+         String sql = "SELECT C.VIN, C.Year, C.Make, C.Model " +
+                   "FROM Car C, Owns O " +
+                   "WHERE C.VIN = O.VIN AND O.Phone_Num = '" + phoneNum + "';";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void DisplayServices(EmbeddedSQL esql, String vin) {
-      //Display all OPEN services requests ID and description from VIN.
+      try {
+         String sql = "SELECT S.ID, S.Description " +
+                   "FROM Service S, Needs N " +
+                   "WHERE S.ID = N.Service_ID " +
+                   "AND N.VIN = '" + vin + "' " +
+                   "AND S.Status = 'Open';";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static int NumRequests(EmbeddedSQL esql) {
-      //select * from service table and return row number
+      try {
+         String sql = "SELECT * FROM Service;";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
       return 0;
    }
 
    public static int CustomerExists(EmbeddedSQL esql, String lastName){
-    //simply return row number from customer last name  
-    return 0;
-
+      try {
+         String sql = "SELECT * FROM Customer WHERE Last_Name = '" + lastName + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
    }
 
    public static int MechanicExists(EmbeddedSQL esql, int employeeID) {
-      //Simply return row number from mechanic's ID
+      try {
+         String sql = "SELECT * FROM Mechanic WHERE ID = " + employeeID + ";";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
       return 0;
    }
 
    public static int VehicleExists(EmbeddedSQL esql, String phoneNum) {
-      //Return the row number from customer's phone number
+      try {
+         String sql = "SELECT * FROM Owns WHERE Phone_Num = '" + phoneNum + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
       return 0;
    }
 
    public static int ServiceExists(EmbeddedSQL esql, int serviceID) {
-      //Return the row number from service table based on service table
+      try {
+         String sql = "SELECT * FROM Service WHERE ID = " + serviceID + ";";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
       return 0;
    }
 
    public static int AviliableServices(EmbeddedSQL esql, String vin) {
-      //Return the row number from all OPEN services based on vin number
+      try {
+         String sql = "SELECT * " +
+                   "FROM Service S, Needs N " +
+                   "WHERE S.ID = N.Service_ID " +
+                   "AND N.VIN = '" + vin + "' " +
+                   "AND S.Status = 'Open';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
       return 0;
    }
 
-
    public static int IsAlreadyWorking(EmbeddedSQL esql, int ID, String vin) {
-      //Return the row number from mechanics' id and car's vin number
+      try {
+         String sql = "SELECT * FROM Works_On " +
+                   "WHERE Mechanic_ID = " + ID + " AND VIN = '" + vin + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
       return 0;
    }
 
    public static void CustomerOwns(EmbeddedSQL esql, String phoneNum, String vin) {
-      //add the phone number and vin number to owns table so we can identify which customer owns which car
+      try {
+         String sql = "INSERT INTO Owns (Phone_Num, VIN) " +
+                   "VALUES ('" + phoneNum + "', '" + vin + "');";
+         esql.executeUpdate(sql);
+         System.out.println("Ownership added.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void CarsNeedsService(EmbeddedSQL esql, String vin, int ID) {
-      //add vin number and service id to needs table so we can idenitfy which car needs what service
+      try {
+         String sql = "INSERT INTO Needs (VIN, Service_ID) " +
+                   "VALUES ('" + vin + "', " + ID + ");";
+         esql.executeUpdate(sql);
+         System.out.println("Service linked to car.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void WorksOn(EmbeddedSQL esql, int ID, String vin) {
-      //add employee id and vin number to worksOn table so we know which mechanic is in charge of which car
+      try {
+         String sql = "INSERT INTO Works_On (Mechanic_ID, VIN) " +
+                   "VALUES (" + ID + ", '" + vin + "');";
+         esql.executeUpdate(sql);
+         System.out.println("Mechanic assigned to car.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void Handles(EmbeddedSQL esql, int employeeID, int serviceID, int bill, LocalDate today, String comments) {
-      //add the arguments to handles table so we know who closed the service request.
+      try {
+         String sql = "INSERT INTO Handles (Mechanic_ID, Service_ID, Bill, Closed_Date, Comments) " +
+                   "VALUES (" + employeeID + ", " + serviceID + ", " + bill + ", '" + today.toString() + "', '" + comments + "');";
+         esql.executeUpdate(sql);
+         System.out.println("Service request closed record inserted.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
    
    public static void AddCustomer(EmbeddedSQL esql, String firstName, String lastName, String phoneNum, String address){
-      //Add customer to database
+      try {
+         String sql = "INSERT INTO Customer (Phone_Num, First_Name, Last_Name, Address) " +
+                   "VALUES ('" + phoneNum + "', '" + firstName + "', '" + lastName + "', '" + address + "');";
+         esql.executeUpdate(sql);
+         System.out.println("Customer added.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void AddMechanic(EmbeddedSQL esql, int ID, String firstName, String lastName, int experience){
-      //Add Mechanic to database
+      try {
+         String sql = "INSERT INTO Mechanic (ID, First_Name, Last_Name, Experience) " +
+                   "VALUES (" + ID + ", '" + firstName + "', '" + lastName + "', " + experience + ");";
+         esql.executeUpdate(sql);
+         System.out.println("Mechanic added.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void AddVehicle(EmbeddedSQL esql, String vin, int year, String make, String model){
-      //Add vehicle to database
+      try {
+         String sql = "INSERT INTO Car (VIN, Year, Make, Model) " +
+                   "VALUES ('" + vin + "', " + year + ", '" + make + "', '" + model + "');";
+         esql.executeUpdate(sql);
+         System.out.println("Vehicle added.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void AddService(EmbeddedSQL esql, int ID, LocalDate today, String status, int odometer, String text) {
-      //Create a new service request
+      try {
+         String sql = "INSERT INTO Service (ID, Open_Date, Status, Odometer, Description) " +
+                   "VALUES (" + ID + ", '" + today.toString() + "', '" + status + "', " + odometer + ", '" + text + "');";
+         esql.executeUpdate(sql);
+         System.out.println("Service request added.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void UpdateService(EmbeddedSQL esql, int serviceID) {
-      //Update the service col from open to closed based on the serviceID
+      try {
+         String sql = "UPDATE Service " +
+                   "SET Status = 'Closed' " +
+                   "WHERE ID = " + serviceID + ";";
+         esql.executeUpdate(sql);
+         System.out.println("Service updated to Closed.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void DeleteCar(EmbeddedSQL esql, int employeeID, String vin) {
-      //Delete row from WorksOn table based on the ID and vin number
+      try {
+         String sql = "DELETE FROM Works_On " +
+                   "WHERE Mechanic_ID = " + employeeID + " AND VIN = '" + vin + "';";
+         esql.executeUpdate(sql);
+         System.out.println("Mechanic removed from active car assignment.");
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
    public static void Query2(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query2
+      try {
+         String sql = "SELECT Closed_Date, Comments, Bill " +
+                   "FROM Handles " +
+                   "WHERE Bill < 100 " +
+                   "ORDER BY Closed_Date;";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
 
    public static void Query3(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query3
+      try {
+         String sql = "SELECT C.First_Name, C.Last_Name " +
+                   "FROM Customer C, Owns O " +
+                   "WHERE C.Phone_Num = O.Phone_Num " +
+                   "GROUP BY C.Phone_Num, C.First_Name, C.Last_Name " +
+                   "HAVING COUNT(DISTINCT O.VIN) > 20;";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
 
    public static void Query4(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query4
+      try {
+         String sql = "SELECT DISTINCT C.Make, C.Model, C.Year " +
+                   "FROM Car C, Needs N, Service S " +
+                   "WHERE C.VIN = N.VIN " +
+                   "AND N.Service_ID = S.ID " +
+                   "AND C.Year < 1995 " +
+                   "AND S.Odometer < 50000;";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
 
    public static void Query5(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query5
+      try {
+         System.out.print("Enter k: ");
+         int k = readIntChoice();
+
+         if (k <= 0) {
+            System.out.println("k must be greater than 0.");
+            return;
+         }
+
+         String sql = "SELECT C.Make, C.Model, COUNT(*) AS Num_Service_Requests " +
+                   "FROM Car C, Needs N, Service S " +
+                   "WHERE C.VIN = N.VIN " +
+                   "AND N.Service_ID = S.ID " +
+                   "AND S.Status = 'Open' " +
+                   "GROUP BY C.VIN, C.Make, C.Model " +
+                   "ORDER BY Num_Service_Requests DESC " +
+                   "LIMIT " + k + ";";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
 
    public static void Query6(EmbeddedSQL esql){
-      // Your code goes here.
-      // ...
-      // ...
-   }//end Query6
-
-
+      try {
+         String sql = "SELECT C.First_Name, C.Last_Name, SUM(H.Bill) AS Total_Bill " +
+                   "FROM Customer C, Owns O, Needs N, Handles H " +
+                   "WHERE C.Phone_Num = O.Phone_Num " +
+                   "AND O.VIN = N.VIN " +
+                   "AND N.Service_ID = H.Service_ID " +
+                   "GROUP BY C.Phone_Num, C.First_Name, C.Last_Name " +
+                   "ORDER BY Total_Bill DESC;";
+         esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
 
 }//end EmbeddedSQL
