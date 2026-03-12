@@ -103,12 +103,6 @@ COPY Owns (
 FROM '/class/classes/ahern561/CS-166-project/Owns.csv'
 WITH DELIMITER ',';
 
-COPY Works_On (
-  Mechanic_ID,
-  VIN)
-FROM '/class/classes/ahern561/CS-166-project/Works_On.csv'
-WITH DELIMITER ',';
-
 COPY Needs (
   VIN,
   Service_ID)

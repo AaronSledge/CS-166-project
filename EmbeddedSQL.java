@@ -179,16 +179,8 @@ public class EmbeddedSQL {
          System.out.println("Do you need to be added to the system: Type Yes/No");
          String answer = readStringChoice();
          int employeeID = 0;
-         if(answer.toLowerCase() == "yes") {
-            System.out.println("Enter your work ID: ");
-            employeeID = readIntChoice();
-            System.out.println("Enter your first name: ");
-            String firstName = readStringChoice();
-            System.out.println("Enter your last name: ");
-            String lastName = readStringChoice();
-            System.out.println("Enter how many years of experience you have: ");
-            int experience = readIntChoice();
-            AddMechanic(esql, employeeID, firstName, lastName, experience);
+         if(answer.equalsIgnoreCase("yes")) {
+            employeeID = newMechanic(esql);
          }
 
          boolean isEmployee = false;
@@ -205,29 +197,40 @@ public class EmbeddedSQL {
              }
          }
 
-            
-      
+         String vin = "";
+
+         int rowCount = IsAlreadyWorking(esql, employeeID);
+         if(rowCount > 0) {
+            System.out.println("Enter the VIN number as seen on screen");
+            vin = readStringChoice();
+         }
          while(!quit) {
             // These are sample SQL statements
             System.out.println("Are you here for ");
-            System.out.println("0. Type 0 if you wish to open a service request");
-            System.out.println("1. Type 1 if you wish to close a service request");
-            System.out.println("2. Type 2 if you wish to list customers that paid less than 100 dollars");
-            System.out.println("3. Type 3 if you wish to list customers with more than 20 cars");
-            System.out.println("4. Type 4 if you wish to list cars built before 1995 that has less than 50000 miles"); 
-            System.out.println("5. Type 5 if you wish to list the first k cars with the highest number of service requests");
-            System.out.println("6. Type 6 if you wish to list all the customers and total bill in descending order");
-            System.out.println("9. < EXIT");
+            System.out.println("0. Type 0 if you wish to add a customer");
+            System.out.println("1. Type 1 if you wish to open add a car");
+            System.out.println("2. Type 2 if you wish to open a service request");
+            System.out.println("3. Type 3 if you wish to work on a specfic car");
+            System.out.println("4. Type 4 if you wish to close a service request");
+            System.out.println("5. Type 5 if you wish to list customers that paid less than 100 dollars");
+            System.out.println("6. Type 6 if you wish to list customers with more than 20 cars");
+            System.out.println("7. Type 7 if you wish to list cars built before 1995 that has less than 50000 miles"); 
+            System.out.println("8. Type 8 if you wish to list the first k cars with the highest number of service requests");
+            System.out.println("9. Type 9 if you wish to list all the customers and total bill in descending order");
+            System.out.println("10. < EXIT");
 
             switch (readIntChoice()){
-               case 0: ServiceRequest(esql, employeeID); break;
-               case 1: CloseRequest(esql, employeeID); break;
-               case 2: Query2(esql); break;
-               case 3: Query3(esql); break;
-               case 4: Query4(esql); break;
-               case 5: Query5(esql); break;
-               case 6: Query6(esql); break;
-               case 9: quit = true; break;
+               case 0: newCustomer(esql); break;
+               case 1: newVehicle(esql); break;
+               case 2: ServiceRequest(esql, employeeID); break;
+               case 3: vin = SelectCar(esql, employeeID, vin); break;
+               case 4: vin = CloseRequest(esql, employeeID, vin); break;
+               case 5: Query2(esql); break;
+               case 6: Query3(esql); break;
+               case 7: Query4(esql); break;
+               case 8: Query5(esql); break;
+               case 9: Query6(esql); break;
+               case 10: quit = true; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
          }//end while
@@ -247,96 +250,214 @@ public class EmbeddedSQL {
       }//end try
    }//end main
 
+
+   public static String newCustomer(EmbeddedSQL esql) {
+     boolean correctPhoneNum = false;
+     String phoneNum = "";
+     while(!correctPhoneNum) {
+      System.out.println("Enter customer's phone number: ");
+      phoneNum = readStringChoice();
+      int rowCount = PhoneNumExists(esql, phoneNum);
+      if(rowCount > 0) {
+         System.out.println("Phone number already exists: Please re enter: ");
+      }
+      else {
+         correctPhoneNum = true;
+      }
+     }
+     
+      System.out.println("Enter customer's first name: ");
+      String firstName = readStringChoice();
+      System.out.println("Enter customer's last name: ");
+      String lastName = readStringChoice();
+      System.out.println("Enter customer's address: ");
+      String address = readStringChoice();
+      AddCustomer(esql, firstName, lastName, phoneNum, address);
+      return lastName;
+   }
+
+   public static String newVehicle(EmbeddedSQL esql) {
+      boolean correctVin = false;
+      String vin = "";
+      while(!correctVin) {
+         System.out.println("Please type in vehicle's VIN: ");
+         vin = readStringChoice();
+         int rowCount = VinExists(esql, vin);
+         if(rowCount > 0) {
+            System.out.println("VIN already taken: Please enter correct VIN");
+         }
+         else {
+            correctVin = true;
+         }
+      }
+      System.out.println("Please type in vehicle's year: ");
+      int year = readIntChoice();
+      System.out.println("Please type in vehicle's make: ");
+      String make = readStringChoice();
+      System.out.println("Please type in vehicle's model: ");
+      String model = readStringChoice();
+
+
+      AddVehicle(esql, vin, year, make, model);
+
+      boolean correctPhoneNum = false;
+      String phoneNum = "";
+      while(!correctPhoneNum) {
+         System.out.println("Please type in your phone number: ");
+         phoneNum = readStringChoice();
+         int rowCount = PhoneNumExists(esql, phoneNum);
+         if(rowCount <= 0) {
+            System.out.println("Phone number incorrect: Do you want to be added as customer. If not retry entering phone number again(Yes/No): ");
+            String answer = readStringChoice();
+            if(answer.equalsIgnoreCase("Yes")) {
+               String lastName = newCustomer(esql);
+               break;
+            }
+         }
+         else {
+            correctPhoneNum = true;
+         }
+      }
+      CustomerOwns(esql, phoneNum, vin);
+      return vin;
+   }
+
+   public static int newMechanic(EmbeddedSQL esql) {
+      boolean isTaken = false;
+      int employeeID = 0;
+      while(!isTaken) {
+         System.out.println("Enter your work ID: ");
+         employeeID = readIntChoice();
+         int rowCount = AlreadyWorker(esql, employeeID);
+         if(rowCount > 0) {
+            System.out.println("ID already taken, please re enter ID: ");
+         }
+         else {
+            isTaken = true;
+         }
+      }
+      System.out.println("Enter your first name: ");
+      String firstName = readStringChoice();
+      System.out.println("Enter your last name: ");
+      String lastName = readStringChoice();
+      System.out.println("Enter how many years of experience you have: ");
+      int experience = readIntChoice();
+      AddMechanic(esql, employeeID, firstName, lastName, experience);
+      return employeeID;
+   }
    public static void ServiceRequest(EmbeddedSQL esql, int employeeID) {
       System.out.println("Enter your customer's last name: ");
-      String phoneNum;
       String lastName = readStringChoice();
       int rowCount = CustomerExists(esql, lastName);
       if(rowCount <= 0) {
          System.out.println("Customer does not exist, please add to database");
-         System.out.println("Enter customer's first name: ");
-         String firstName = readStringChoice();
-         System.out.println("Enter customer's phone number: ");
-         phoneNum = readStringChoice();
-         System.out.println("Enter customer's address: ");
-         String address = readStringChoice();
-         AddCustomer(esql, firstName, lastName, phoneNum, address);
+         lastName = newCustomer(esql);
       }
-      else{
-         DisplayCustomers(esql, lastName);
+
+      DisplayCustomers(esql, lastName);
+
+      boolean correctPhoneNum = false;
+      String phoneNum = "";
+      while(!correctPhoneNum) {
          System.out.println("Please type in phone number to select customer: ");
          phoneNum = readStringChoice();
+         rowCount = PhoneNumMatch(esql, phoneNum, lastName);
+         if (rowCount <= 0) {
+            System.out.println("Cannot find phone number in our records. Please re enter");
+         }
+         else {
+            correctPhoneNum = true;
+         }
       }
 
       rowCount = VehicleExists(esql, phoneNum);
-      String vin;
+      String vin = "";
       if(rowCount <= 0) {
          System.out.println("It seems you have no cars added, please add car to database");
-         System.out.println("Please type in vehicle's VIN: ");
-         vin = readStringChoice();
-         System.out.println("Please type in vehicle's year: ");
-         int year = readIntChoice();
-         System.out.println("Please type in vehicle's make: ");
-         String make = readStringChoice();
-         System.out.println("Please type in vehicle's model: ");
-         String model = readStringChoice();
-         AddVehicle(esql, vin, year, make, model);
-         CustomerOwns(esql, phoneNum, vin);
+         vin = newVehicle(esql);
       }
       else {
-         DisplayVehicles(esql, phoneNum);
-         System.out.println("Please type in VIN to select vehicle: ");
-         vin = readStringChoice();
+         boolean correctVin = false;
+         while(!correctVin) {
+            System.out.println("Pick a car for service");
+            DisplayVehicles(esql, phoneNum);
+            vin = readStringChoice();
+            rowCount = VinMatch(esql, phoneNum, vin);
+            if(rowCount <= 0) {
+               System.out.println("Cannot find VIN in our records. Please re enter");
+            }
+            else {
+               correctVin = true;
+            }
+         }
       }
 
-      rowCount = NumRequests(esql);
 
+      int requests = NumRequests(esql);
       System.out.println("Create service request.");
       LocalDate today = LocalDate.now();
-      System.out.println("Please enter if the service is open or closed(Type Open/Closed): ");
-      String status = readStringChoice();
+      String status = "Open";
       System.out.println("Please enter odometer reading: ");
       int odometer = readIntChoice();
       System.out.println("Please type a short description of the service needed: ");
       String description = readStringChoice();
 
-      AddService(esql, rowCount + 1, today, status, odometer, description);
-      CarsNeedsService(esql, vin, rowCount + 1);
-      rowCount = IsAlreadyWorking(esql, employeeID, vin);
+      AddService(esql, requests + 101, today, status, odometer, description);
+      CarsNeedsService(esql, vin, requests + 101);
+   }
+
+   public static String SelectCar(EmbeddedSQL esql, int employeeID, String vin) {
+       int rowCount = IsAlreadyWorking(esql, employeeID);
 
       if(rowCount >= 1) {
          System.out.println("It seems you are already working on another car. Please let another employee handle this car.");
+         return vin;
       }
-      else {
-         WorksOn(esql, employeeID, vin);
+      rowCount = DisplayALLVehicles(esql);
+      if(rowCount <= 0) {
+         System.out.println("No cars require service as of right now.");
+         return vin;
       }
-   }
 
-   public static void CloseRequest(EmbeddedSQL esql, int employeeID) {
-      
-      boolean correctCar = false;
-      String vin = "";
-      while(!correctCar) {
-         System.out.println("Please select the vin number for the car you are working on: ");
+      boolean correctVin = false;
+      vin = "";
+      while(!correctVin) {
+         System.out.println("Please type in vehicle's VIN: ");
          vin = readStringChoice();
-         int rowCount = IsAlreadyWorking(esql, employeeID, vin);
+         rowCount = VinExists(esql, vin);
          if(rowCount <= 0) {
-            System.out.println("The given vin number does not match the car you are working on. Please re type vin: ");
+            System.out.println("VIN doesn't exist: Re enter the correct vin number");
          }
          else {
-            correctCar = true;
+            correctVin = true;
          }
       }
+      WorksOn(esql, employeeID, vin);
+      return vin;
+   }
 
+   public static String CloseRequest(EmbeddedSQL esql, int employeeID, String vin) {
+      int rowCount = IsAlreadyWorking(esql, employeeID);
+      if(rowCount <= 0) {
+         System.out.println("It seems you are not working on a car at the moment. Please open a service request first.");
+         return vin;
+      }
 
+      boolean correctCar = false;
       boolean validServiceID = false;
       int serviceID = 0;
       while(!validServiceID) {
+
+         rowCount = NumOfService(esql, vin);
+         if (rowCount <= 0) {
+            System.out.println("You are not working on any serivce requests at the moment. Please open a request");
+            return vin;
+         }
          System.out.println("Please select the service number you wish to close: ");
          DisplayServices(esql, vin);
 
          serviceID = readIntChoice();
-         int rowCount = ServiceExists(esql, serviceID);
+         rowCount = ServiceExists(esql, serviceID);
          if(rowCount <= 0) {
             System.out.println("Service ID does not exist in dataset: Please re enter ID: ");
          }
@@ -353,11 +474,14 @@ public class EmbeddedSQL {
 
       Handles(esql, employeeID, serviceID, bill, today, comments);
       UpdateService(esql, serviceID);
-      int rowCount = AviliableServices(esql, vin);
+      rowCount = AviliableServices(esql, vin);
       if(rowCount <= 0) {
          System.out.println("Car has completed all service requests needed");
          DeleteCar(esql, employeeID, vin);
+         vin = "";
       }
+
+      return vin;
    }
 
    public static void Greeting(){
@@ -424,6 +548,19 @@ public class EmbeddedSQL {
       }
    }
 
+   public static int DisplayALLVehicles(EmbeddedSQL esql) {
+      try {
+         String sql = "SELECT DISTINCT N.VIN " +
+                      "FROM Needs N, Service S " +
+                      "WHERE N.SERVICE_ID = S.ID AND S.STATUS = 'Open';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+
+      return 0;
+   }
+
    public static void DisplayServices(EmbeddedSQL esql, String vin) {
       try {
          String sql = "SELECT S.ID, S.Description " +
@@ -435,6 +572,20 @@ public class EmbeddedSQL {
       } catch (Exception e) {
          System.err.println(e.getMessage());
       }
+   }
+
+   public static int NumOfService(EmbeddedSQL esql, String vin) {
+      try {
+         String sql = "SELECT S.ID, S.Description " +
+                      "FROM Service S, Needs N " +
+                      "WHERE S.ID = N.Service_ID " +
+                      "AND N.VIN = '" + vin + "' " +
+                      "AND S.Status = 'Open';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
    }
 
    public static int NumRequests(EmbeddedSQL esql) {
@@ -467,9 +618,49 @@ public class EmbeddedSQL {
       return 0;
    }
 
+   public static int PhoneNumExists(EmbeddedSQL esql, String phoneNum) {
+      try {
+         String sql = "SELECT * FROM Customer WHERE Phone_Num = '" + phoneNum + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
+   }
+
+   public static int PhoneNumMatch(EmbeddedSQL esql, String phoneNum, String lastName) {
+      try {
+         String sql = "SELECT * FROM Customer WHERE Phone_Num = '" + phoneNum + "' AND Last_Name = '" + lastName + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
+   }
+
    public static int VehicleExists(EmbeddedSQL esql, String phoneNum) {
       try {
          String sql = "SELECT * FROM Owns WHERE Phone_Num = '" + phoneNum + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
+   }
+
+   public static int VinExists(EmbeddedSQL esql, String vin) {
+      try {
+         String sql = "SELECT * FROM Car WHERE VIN = '" + vin + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
+   }
+
+   public static int VinMatch(EmbeddedSQL esql, String phoneNum, String vin) {
+      try {
+         String sql = "SELECT * FROM Owns WHERE Phone_Num = '" + phoneNum + "' AND VIN = '" + vin + "';";
          return esql.executeQuery(sql);
       } catch (Exception e) {
          System.err.println(e.getMessage());
@@ -501,15 +692,21 @@ public class EmbeddedSQL {
       return 0;
    }
 
-   public static int IsAlreadyWorking(EmbeddedSQL esql, int ID, String vin) {
+   public static int IsAlreadyWorking(EmbeddedSQL esql, int ID) {
       try {
          String sql;
-         if (vin == null || vin.equals("")) {
-            sql = "SELECT * FROM Works_On WHERE Mechanic_ID = " + ID + ";";
-         } else {
-            sql = "SELECT * FROM Works_On WHERE Mechanic_ID = " + ID +
-                  " AND VIN = '" + vin + "';";
-         }
+         sql = "SELECT * FROM Works_On WHERE Mechanic_ID = " + ID + ";";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
+   }
+
+   public static int AlreadyWorker(EmbeddedSQL esql, int ID) {
+      try {
+         String sql;
+         sql = "SELECT * FROM Mechanic WHERE ID = " + ID + ";";
          return esql.executeQuery(sql);
       } catch (Exception e) {
          System.err.println(e.getMessage());
@@ -560,6 +757,17 @@ public class EmbeddedSQL {
          System.err.println(e.getMessage());
       }
    }
+
+   public static int CorrectWorker(EmbeddedSQL esql, int employeeID, String vin) {
+      try {
+         String sql;
+         sql = "SELECT * FROM Works_On WHERE Mechanic_ID = " + employeeID + " AND VIN = '" + vin + "';";
+         return esql.executeQuery(sql);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+      return 0;
+   }
    
    public static void AddCustomer(EmbeddedSQL esql, String firstName, String lastName, String phoneNum, String address){
       try {
@@ -569,6 +777,7 @@ public class EmbeddedSQL {
          System.out.println("Customer added.");
       } catch (Exception e) {
          System.err.println(e.getMessage());
+         
       }
    }
 
