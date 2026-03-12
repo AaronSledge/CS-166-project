@@ -4,6 +4,8 @@ DROP INDEX IF EXISTS Needs_VIN;
 DROP INDEX IF EXISTS Request_ID;
 DROP INDEX IF EXISTS Employee_ID;
 DROP INDEX IF EXISTS Car_VIN;
+DROP INDEX IF EXISTS Service_ID;
+DROP INDEX IF EXISTS Needs_Service_ID;
 
 CREATE INDEX Customer_PhoneNum ON Customer(Phone_Num);
 CREATE INDEX Customer_lastName ON Customer(Last_Name);
@@ -11,3 +13,5 @@ CREATE INDEX Needs_VIN ON Needs(VIN);
 CREATE INDEX Request_ID ON Service(ID);
 CREATE INDEX Employee_ID ON Mechanic(ID);
 CREATE INDEX Car_VIN ON Car(VIN);
+CREATE INDEX Service_ID ON Service(ID);
+CREATE INDEX Needs_Service_ID ON Needs(Service_ID);

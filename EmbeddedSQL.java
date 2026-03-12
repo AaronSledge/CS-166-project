@@ -174,7 +174,7 @@ public class EmbeddedSQL {
          boolean quit = false;
 
          //welcome page
-         System.out.println("Welcome to **** mechanics:");
+         System.out.println("Welcome to Gearhead Garage:");
          System.out.println("---------");
          System.out.println("Do you need to be added to the system: Type Yes/No");
          String answer = readStringChoice();
